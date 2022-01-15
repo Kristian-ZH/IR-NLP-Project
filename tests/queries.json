@@ -1,0 +1,47 @@
+{
+    "queries": [
+         {
+            "query": "footballer France Forward",
+            "result": [
+                "karim_benzema.txt",
+                "antoine_griezmann.txt",
+                "kylian_mbappe.txt"
+            ]
+        },
+        {
+            "query": "footballer Barcelona forward",
+            "result": [
+                "lionel_messi.txt",
+                "neymar.txt",
+                "antoine_griezmann.txt"
+            ]
+        },
+        {
+            "query": "footballer born march",
+            "result": [
+                "antoine_griezmann.txt",
+                "paul_pogba.txt",
+                "manuel_neuer.txt",
+                "hakim_ziyech.txt",
+                "timo_werner.txt",
+                "carlo_pinsoglio.txt"
+            ]
+        },
+        {
+            "query": "footballer Bayern",
+            "result": [
+                "manuel_neuer.txt",
+                "robert_lewandowski.txt",
+                "david_alaba.txt",
+                "toni_kroos.txt"
+            ]
+        },
+        {
+            "query": "footballer defensive midfielder",
+            "result": [
+                "casemiro.txt",
+                "trevoh_chalobah.txt"
+            ]
+        }
+    ]
+}
