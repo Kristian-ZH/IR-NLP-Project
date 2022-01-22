@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <title>Document</title>
+</head>
+
+<body style="background-image: url(webplunder-background-image-technology-online-website-solutions.jpg);">
+    <nav>
+        <div class="nav-wrapper" style="background-color: lightblue;">
+            <form>
+                <div class="input-field">
+                    <input id="search" type="search" required>
+                    <label class="label-icon" for="search"><i class="material-icons dropdown-trigger"
+                            data-target='dropdown1'>search</i></label>
+                    <i class="material-icons">close</i>
+                </div>
+            </form>
+        </div>
+    </nav>
+    <!-- Dropdown Trigger
+        chevron_right
+    <a class='dropdown-trigger btn' href='#' data-target='dropdown1'><i class="material-icons">search</i></a>
+ -->
+    <!-- Dropdown Structure -->
+    <ul id='dropdown1' class='dropdown-content' >
+        <li><a href="#!" onclick="searchF('vsm')">VSM </a></li>
+        <li><a href="#!" onclick="searchF('bim')">BIM </a></li>
+        <li><a href="#!" onclick="searchF('boolean')">Boolean </a></li>
+    </ul>
+
+    <div id="results" class="collection">
+        <a href="#!" class="collection-item">Yakoo search</a>
+    </div>
+
+    <script>
+        function searchF(method) {
+            clearResults()
+            let query = document.getElementById("search").value
+            getResultsTest(method, query)
+        }
+
+        function getResultsTest(method, query) {
+            console.log(method, " ", query)
+            populateResults(["A", "B"], ["https://google.com", "https://google.com"])
+        }
+
+        function getResults(method, query) {
+            fetch(`http://localhost:8080/${method}?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    names = data.results
+                    urls = data.urls
+                    populateResults(names, urls)
+                });
+        }
+
+        function clearResults() {
+            let results = document.querySelector("#results")
+            results.innerHTML = ""
+        }
+
+        function populateResults(names, urls) {
+            let results = document.querySelector("#results")
+            for (let i = 0; i < names.length; i++) {
+                let entry = document.createElement("a")
+                entry.setAttribute("class", "collection-item")
+                entry.setAttribute("href", urls[i])
+                entry.setAttribute("target", "_blanch")
+                entry.innerHTML = names[i]
+                results.appendChild(entry)
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.dropdown-trigger');
+            var instances = M.Dropdown.init(elems);
+        });
+    </script>
+
+</body>
+
+
+</html>
