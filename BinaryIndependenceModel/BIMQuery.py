@@ -1,7 +1,6 @@
 from BinaryIndependenceModel.BIM import BIM
 
 dict = {}
-listObj = []
 
 def vectorize(doc):
     res = [0] * 65536
@@ -14,6 +13,7 @@ def vectorize(doc):
     return res
 
 def BIMQuery(data, query, firstN):
+    listObj = []
     for doc in data.keys():
         obj = {"doc_name": doc, "doc": data[doc]}
         wordArr = data[doc].split(" ")
