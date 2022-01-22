@@ -49,7 +49,6 @@ def preprocessData(data):
         data[idx] = preprocessText(text)
 
 # Flow
-#GeneratePeople.generateTexts('./corpus/combined.txt')
 data = loadDate('dataGeneration/people')
 
 preprocessData(data)
@@ -60,9 +59,92 @@ vec = TfidfVectorizer(norm=None)
 corpus = vec.fit_transform(data)
 
 
-# LOOP
-query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
-preprocessed_query = preprocessText(query)
 
-print(VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5))
-print(BIMQuery(data, preprocessed_query, 5))
+
+# query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
+# preprocessed_query = preprocessText(query)
+
+# print(VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5))
+# print(BIMQuery(data, preprocessed_query, 5))
+
+
+
+# Server
+from flask import Flask, render_template, Response
+from flask_restful import Resource, Api, reqparse
+import pandas as pd
+import ast
+import os.path
+
+
+app = Flask(__name__)
+api = Api(app)
+
+def appendUrl(result):
+    resultWithUrls = [{"name": person, "url": "https://en.wikipedia.org/wiki/" + person} for person in result]
+    return resultWithUrls
+
+# Logic
+class VSM(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()  # initialize
+        parser.add_argument('query', required=True)  # add args
+        args = parser.parse_args()
+        query = args['query']
+
+        # query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
+        preprocessed_query = preprocessText(query)
+
+        result = VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5)
+        return {'result': appendUrl(result)}, 200  # return data and 200 OK
+
+class BIM(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()  # initialize
+        parser.add_argument('query', required=True)  # add args
+        args = parser.parse_args()
+        query = args['query']
+
+        # query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
+        preprocessed_query = preprocessText(query)
+
+        result = BIMQuery(data, preprocessed_query, 5)
+        print("KRIS")
+        print(appendUrl(result))
+        print("KRIS")
+        return {'result': appendUrl(result)}, 200  # return data and 200 OK
+
+# class Boolean(Resource):
+#     def get(self):
+#         parser = reqparse.RequestParser()  # initialize
+#         parser.add_argument('query', required=True)  # add args
+#         args = parser.parse_args()
+#         query = args['query']
+
+#         # query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
+#         preprocessed_query = preprocessText(query)
+
+#         result = VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5)
+#         return {'result': appendUrl(result)}, 200  # return data and 200 OK
+
+def root_dir():  # pragma: no cover
+    return os.path.abspath(os.path.dirname(__file__))
+
+def get_file(filename):  # pragma: no cover
+    try:
+        src = os.path.join(root_dir(), filename)
+        return open(src).read()
+    except IOError as exc:
+        return str(exc)
+
+@app.route('/')
+def index_page():
+    content = get_file('frontend/index.html')
+    return Response(content, mimetype="text/html")
+
+api.add_resource(VSM, '/vsm')  # add endpoints
+api.add_resource(BIM, '/bim')  # add endpoints
+#api.add_resource(BIM, '/boolean')  # add endpoints
+
+if __name__ == '__main__':
+    app.run()
