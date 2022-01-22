@@ -49,7 +49,7 @@
         function searchF(method) {
             clearResults()
             let query = document.getElementById("search").value
-            getResultsTest(method, query)
+            getResults(method, query)
         }
 
         function getResultsTest(method, query) {
@@ -58,11 +58,13 @@
         }
 
         function getResults(method, query) {
-            fetch(`http://localhost:8080/${method}?query=${query}`)
+            console.log(`http://127.0.0.1:5000/${method}?query=${query}`)
+            fetch(`http://127.0.0.1:5000/${method}?query=${query}`)
                 .then(response => response.json())
                 .then(data => {
-                    names = data.results
-                    urls = data.urls
+                    console.log(data)
+                    names = data.result.map(x => x.name)
+                    urls = data.result.map(x => x.url)
                     populateResults(names, urls)
                 });
         }
