@@ -6,15 +6,16 @@ import sys
 
 sys.path.insert(1, 'DataGeneration')
 sys.path.insert(1, 'VectorSpaceModel')
-import GeneratePeople
+
+from BinaryIndependenceModel.BIMQuery import BIMQuery
 import VectorSpaceModel
 
 def loadDate(path): # data-generation/people
     files = os.listdir(path)
-    data = pd.Series([],dtype=pd.StringDtype())
+    data = pd.Series([],dtype=pd.StringDtype()) 
 
     for file in files:
-        f = open(os.path.join(path, file),'r')
+        f = open(os.path.join(path, file), encoding="utf8")
         data[f.name[22:]]= f.read()
         f.close
     
@@ -27,6 +28,8 @@ from nltk.tokenize import word_tokenize
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from nltk.stem import 	WordNetLemmatizer
 
+nltk.download('punkt', quiet=True)
+nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
 nltk.download('stopwords', quiet=True)
 stop_words = set(stopwords.words('english'))
@@ -48,6 +51,7 @@ def preprocessData(data):
 # Flow
 #GeneratePeople.generateTexts('./corpus/combined.txt')
 data = loadDate('dataGeneration/people')
+
 preprocessData(data)
 
 # VECTOR SPACE MODEL
@@ -59,4 +63,6 @@ corpus = vec.fit_transform(data)
 # LOOP
 query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
 preprocessed_query = preprocessText(query)
+
 print(VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5))
+print(BIMQuery(data, preprocessed_query, 5))
