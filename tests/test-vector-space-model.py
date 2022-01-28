@@ -2,13 +2,16 @@ import json
 from os import walk
 from sklearn.metrics import recall_score
 import sys
+from sklearn.feature_extraction.text import TfidfVectorizer
 
-sys.path.insert(1, 'VectorSpaceModel')
+sys.path.insert(1, '../VectorSpaceModel')
+sys.path.insert(1, '../utils')
+
 import VectorSpaceModel
-
+import utils
 
 def loadQueries():
-    f = open('tests/queries.json')
+    f = open('queries.json')
     data = json.load(f)
     queries_result = [(query['query'], query['result']) for query in data['queries']]
     f.close()
@@ -16,13 +19,19 @@ def loadQueries():
     return queries_result
 
 expected_result = loadQueries()
-query_result = [VectorSpaceModel.vectorSpaceModel(VectorSpaceModel.vec, VectorSpaceModel.corpus, VectorSpaceModel.preprocessText(query[0]), 10) for query in expected_result]
+
+data = utils.loadDate('../DataGeneration/people', 25)
+utils.preprocessData(data)
+vec = TfidfVectorizer(norm=None)
+corpus = vec.fit_transform(data)
+
+query_result = [VectorSpaceModel.vectorSpaceModel(data, vec, corpus, utils.preprocessText(query[0]), 10) for query in expected_result]
 
 def to_vector(docs, doc_set):
     return [1 if doc in doc_set else 0 for doc in docs]
 
 def testVectorSpaceModel():
-    filenames = next(walk('data-generation/people'), (None, None, []))[2]
+    filenames = next(walk('../DataGeneration/people'), (None, None, []))[2]
 
     gold_v = [to_vector(filenames, _v[1]) for _v in expected_result]
     predicted_v = [to_vector(filenames, _v) for _v in query_result]
