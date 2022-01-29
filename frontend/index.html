@@ -42,9 +42,57 @@
     </ul>
 
     <div id="results" class="collection">
-        <a href="#!" class="collection-item">Yakoo search</a>
+        <div class="card">
+            <div class="card-content">
+              <span class="card-title">Yakoo search</span>
+              <p>This website provides a search engine with the implementations of VSM, BIM and Boolean Retreival. </p>
+            </div>
+            <div class="card-action">
+                    <p>
+                      <label>
+                        <input name="yakoo" type="radio" onclick="document.querySelector('#results .card p').innerHTML = 'This is the part of the document where the query information is'" />
+                        <span>Raw</span>
+                      </label>
+                    </p>
+                    <p>
+                      <label>
+                        <input name="yakoo" type="radio"  onclick="document.querySelector('#results .card p').innerHTML = 'This is the tokenisation of the result'" />
+                        <span>Tokenised</span>
+                      </label>
+                    </p>
+            </div>
+          </div>
     </div>
+    
 
+<!--
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">Card Title</span>
+              <p>I am a very simple card. I am good at containing small bits of information.
+              I am convenient because I require little markup to use effectively.</p>
+            </div>
+            <div class="card-action">
+                    <p>
+                      <label>
+                        <input type="radio" checked />
+                        <span>Red</span>
+                      </label>
+                    </p>
+                    <p>
+                      <label>
+                        <input type="radio" />
+                        <span>Yellow</span>
+                      </label>
+                    </p>
+            </div>
+          </div>
+          -->
+    <style>
+        .card-action > p {
+            display: inline;
+        }
+    </style>
     <script>
         function searchF(method) {
             clearResults()
@@ -54,7 +102,7 @@
 
         function getResultsTest(method, query) {
             console.log(method, " ", query)
-            populateResults(["A", "B"], ["https://google.com", "https://google.com"])
+            populateResults(["A", "B","C"], ["a","b","c"],["https://google.com", "https://google.com","https://google.com"])
         }
 
         function getResults(method, query) {
@@ -74,14 +122,93 @@
             results.innerHTML = ""
         }
 
-        function populateResults(names, urls) {
+        function populateResults(names,raws, urls) {
+            let tokenised_results = []
+
             let results = document.querySelector("#results")
             for (let i = 0; i < names.length; i++) {
-                let entry = document.createElement("a")
-                entry.setAttribute("class", "collection-item")
-                entry.setAttribute("href", urls[i])
-                entry.setAttribute("target", "_blanch")
-                entry.innerHTML = names[i]
+                let default_tokenisation = [{word: "This", color:"red"} ,{word: "is", color:"green"},{word: "test", color:"blue"}]
+                tokenised_results.push(default_tokenisation)
+
+                console.log(`Fetching http://127.0.0.1:5000/color?sentences=${raws[i]}`)
+                fetch(`http://127.0.0.1:5000/color?sentences=${raws[i]}`,)
+                    .then(response => response.json())
+                    .then(data => {
+                        tokenised_results[i] = data
+                    })
+
+                let entry = document.createElement("div")
+                entry.setAttribute("class", "card")
+
+                let card_content = document.createElement("div")
+                card_content.setAttribute("class", "card-content")
+                card_content.addEventListener("click",() => window.open(urls[i], '_blank').focus())
+
+                let card_title = document.createElement("span")
+                card_title.setAttribute("class","card-title")
+                card_title.innerHTML = names[i]
+
+                let raw_descr = document.createElement("p")
+                raw_descr.innerHTML = raws[i]
+
+                let card_actions = document.createElement("div")
+                card_actions.setAttribute("class", "card-action")
+
+                let raw_action_p = document.createElement("p")
+                let raw_action_label = document.createElement("label")
+                let raw_action_input = document.createElement("input")
+                raw_action_input.setAttribute("type","radio")
+                raw_action_input.setAttribute("name","group"+names[i])
+                raw_action_input.setAttribute("checked","")
+
+                raw_action_input.addEventListener("click",(event) => {
+                    let html_input = event.currentTarget
+                    let card = html_input.parentNode.parentNode.parentNode.parentNode
+                    let p = card.querySelector(".card-content p")
+                    p.innerHTML = raws[i] + "!"
+                })
+
+                let raw_action_span = document.createElement("span")
+                raw_action_span.innerHTML = "Raw"
+                raw_action_label.appendChild(raw_action_input)
+                raw_action_label.appendChild(raw_action_span)
+                raw_action_p.appendChild(raw_action_label)
+
+                let tokens_action_p = document.createElement("p")
+                let tokens_action_label = document.createElement("label")
+                let tokens_action_input = document.createElement("input")
+                tokens_action_input.setAttribute("name","group"+names[i])
+                tokens_action_input.setAttribute("type","radio")
+
+                tokens_action_input.addEventListener("click",() => {
+                    let html_input = event.currentTarget
+                    let card = html_input.parentNode.parentNode.parentNode.parentNode
+                    let index = card.getAttribute("result-index")
+                    let p = card.querySelector(".card-content p")
+                    let text = ""
+                    for (let j = 0; j < tokenised_results[i].length; j++){
+                        let token = tokenised_results[i][j]
+                        text +=`<span style="color:${token.color}">${token.word} </span>`
+                    }
+                    p.innerHTML = text
+                })
+
+                let tokens_action_span = document.createElement("span")
+                tokens_action_span.innerHTML = "Tokenised"
+                tokens_action_label.appendChild(tokens_action_input)
+                tokens_action_label.appendChild(tokens_action_span)
+                tokens_action_p.appendChild(tokens_action_label)
+
+
+                card_content.appendChild(card_title)
+                card_content.appendChild(raw_descr)
+
+                card_actions.appendChild(raw_action_p)
+                card_actions.appendChild(tokens_action_p)
+
+                entry.appendChild(card_content)
+                entry.appendChild(card_actions)
+
                 results.appendChild(entry)
             }
         }
