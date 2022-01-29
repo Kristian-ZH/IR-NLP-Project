@@ -94,6 +94,11 @@
         }
     </style>
     <script>
+        let legend = {
+            red: "red ->",
+            green: "green ->"
+        }
+
         function searchF(method) {
             clearResults()
             let query = document.getElementById("search").value
@@ -189,7 +194,7 @@
                     let text = ""
                     for (let j = 0; j < tokenised_results[i].length; j++){
                         let token = tokenised_results[i][j]
-                        text +=`<span class="tooltipped" data-position="top" data-tooltip="${token.color}" style="color:${token.color}">${token.word} </span>`
+                        text +=`<span class="tooltipped" data-position="top" data-tooltip="${legend[token.color]}" style="color:${token.color}">${token.word} </span>`
                     }
                     p.innerHTML = text
 
