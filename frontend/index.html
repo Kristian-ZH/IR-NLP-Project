@@ -113,7 +113,8 @@
                     console.log(data)
                     names = data.result.map(x => x.name)
                     urls = data.result.map(x => x.url)
-                    populateResults(names, urls)
+                    summaries = data.result.map(x => x.summary)
+                    populateResults(names, summaries, urls)
                 });
         }
 
@@ -127,7 +128,7 @@
 
             let results = document.querySelector("#results")
             for (let i = 0; i < names.length; i++) {
-                let default_tokenisation = [{word: "This", color:"red"} ,{word: "is", color:"green"},{word: "test", color:"blue"}]
+                let default_tokenisation = [{word: "Tagging...", color:"green"}]
                 tokenised_results.push(default_tokenisation)
 
                 console.log(`Fetching http://127.0.0.1:5000/color?sentences=${raws[i]}`)
@@ -165,7 +166,7 @@
                     let html_input = event.currentTarget
                     let card = html_input.parentNode.parentNode.parentNode.parentNode
                     let p = card.querySelector(".card-content p")
-                    p.innerHTML = raws[i] + "!"
+                    p.innerHTML = raws[i]
                 })
 
                 let raw_action_span = document.createElement("span")
@@ -194,7 +195,7 @@
                 })
 
                 let tokens_action_span = document.createElement("span")
-                tokens_action_span.innerHTML = "Tokenised"
+                tokens_action_span.innerHTML = "Tagged"
                 tokens_action_label.appendChild(tokens_action_input)
                 tokens_action_label.appendChild(tokens_action_span)
                 tokens_action_p.appendChild(tokens_action_label)

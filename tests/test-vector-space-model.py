@@ -45,4 +45,4 @@ def testVectorSpaceModel():
     return overall_recall/queries_sum
 
 recall_score = testVectorSpaceModel()
-print(recall_score)
+print("The overall recall score is: " + recall_score)
