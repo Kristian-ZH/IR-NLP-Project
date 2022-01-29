@@ -1,5 +1,9 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import spacy
+from spacy import displacy
+from spacy.matcher import PhraseMatcher
+from pathlib import Path
 import os
 import sys
 
@@ -11,6 +15,24 @@ import utils
 from BinaryIndependenceModel.BIMQuery import BIMQuery
 import VectorSpaceModel
 
+colorMap = {
+    "ADJ": "blue",
+    "ADP": "cyan",
+    "ADV": "orange",
+    "AUX": "green",
+    "CONJ": "brown",
+    "CCONJ": "brown",
+    "DET": "magenta",
+    "INTJ": "yellow",
+    "NOUN": "red",
+    "PART": "azure",
+    "PRON": "pink",
+    "PROPN": "purple",
+    "SCONJ": "brown",
+    "VERB": "green",
+    "X": "gray",
+}
+
 data = utils.loadDate('DataGeneration/people', 22)
 
 # Lemmatizing
@@ -20,8 +42,6 @@ utils.preprocessData(data)
 # vec = TfidfVectorizer(norm=None, ngram_range=(1, 3))
 vec = TfidfVectorizer(norm=None)
 corpus = vec.fit_transform(data)
-
-
 
 
 # query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
@@ -38,8 +58,28 @@ from flask_restful import Resource, Api, reqparse
 app = Flask(__name__)
 api = Api(app)
 
-def appendUrl(result):
-    resultWithUrls = [{"name": person, "url": "https://en.wikipedia.org/wiki/" + person} for person in result]
+def fetchKeysentences(person, query):
+        f = open(os.path.join('DataGeneration/people', person), encoding="utf8")
+        text = f.read()
+        f.close
+
+        nlp = spacy.load("en_core_web_sm")
+        phrase_matcher = PhraseMatcher(nlp.vocab)
+        phrases = query.split(' ')
+        patterns = [nlp(text) for text in phrases]
+        phrase_matcher.add('person', None, *patterns)
+
+        doc = nlp(text)
+        sentences = ""
+        for sent in doc.sents:
+            for match_id, start, end in phrase_matcher(nlp(sent.text)):
+                if nlp.vocab.strings[match_id] in ["person"]:
+                    sentences += sent.text
+
+        return sentences
+
+def formatResults(query, result):
+    resultWithUrls = [{"name": person.replace("_", " "), "url": "https://en.wikipedia.org/wiki/" + person, "summary": fetchKeysentences(person, query)} for person in result]
     return resultWithUrls
 
 # Logic
@@ -54,7 +94,8 @@ class VSM(Resource):
         preprocessed_query = utils.preprocessText(query)
 
         result = VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5)
-        return {'result': appendUrl(result)}, 200  # return data and 200 OK
+
+        return {'result': formatResults(preprocessed_query, result)}, 200  # return data and 200 OK
 
 class BIM(Resource):
     def get(self):
@@ -67,8 +108,7 @@ class BIM(Resource):
         preprocessed_query = utils.preprocessText(query)
 
         result = BIMQuery(data, preprocessed_query, 5)
-        print(appendUrl(result))
-        return {'result': appendUrl(result)}, 200  # return data and 200 OK
+        return {'result': formatResults(preprocessed_query, result)}, 200  # return data and 200 OK
 
 # class Boolean(Resource):
 #     def get(self):
@@ -82,6 +122,22 @@ class BIM(Resource):
 
 #         result = VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5)
 #         return {'result': appendUrl(result)}, 200  # return data and 200 OK
+
+class Color(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()  # initialize
+        parser.add_argument('sentences', required=True)  # add args
+        args = parser.parse_args()
+        sentences = args['sentences']
+
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(sentences)
+        taggedWords= []
+
+        for token in doc:
+            taggedWords.append({'word': token.text,  'color':colorMap[token.pos_] if token.pos_ in colorMap else 'black'})
+
+        return taggedWords
 
 def root_dir():  # pragma: no cover
     return os.path.abspath(os.path.dirname(__file__))
@@ -101,6 +157,7 @@ def index_page():
 api.add_resource(VSM, '/vsm')  # add endpoints
 api.add_resource(BIM, '/bim')  # add endpoints
 #api.add_resource(BIM, '/boolean')  # add endpoints
+api.add_resource(Color, '/color')  # add endpoints
 
 if __name__ == '__main__':
     app.run()
