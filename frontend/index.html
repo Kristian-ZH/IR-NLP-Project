@@ -95,14 +95,27 @@
     </style>
     <script>
         let legend = {
-            red: "red ->",
-            green: "green ->"
+            "blue": "ADJ",
+            "cyan": "ADP",
+            "orange": "ADV",
+            "green": "AUX",
+            "brown": "CONJ",
+            "brown": "CCONJ",
+            "magenta": "DET",
+            "yellow": "INTJ",
+            "red": "NOUN",
+            "azure": "PART",
+            "pink": "PRON",
+            "purple": "PROPN",
+            "brown": "SCONJ",
+            "green": "VERB",
+            "gray": "X",
         }
 
         function searchF(method) {
             clearResults()
             let query = document.getElementById("search").value
-            getResultsTest(method, query)
+            getResults(method, query)
         }
 
         function getResultsTest(method, query) {
