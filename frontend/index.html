@@ -63,7 +63,7 @@
             </div>
           </div>
     </div>
-    
+
 
 <!--
           <div class="card">
@@ -97,7 +97,7 @@
         function searchF(method) {
             clearResults()
             let query = document.getElementById("search").value
-            getResults(method, query)
+            getResultsTest(method, query)
         }
 
         function getResultsTest(method, query) {
@@ -128,7 +128,7 @@
 
             let results = document.querySelector("#results")
             for (let i = 0; i < names.length; i++) {
-                let default_tokenisation = [{word: "Tagging...", color:"green"}]
+                let default_tokenisation = [{word: "Tagging...", color:"green"},{word: "Tagging...", color:"red"},{word: "Tagging...", color:"green"}]
                 tokenised_results.push(default_tokenisation)
 
                 console.log(`Fetching http://127.0.0.1:5000/color?sentences=${raws[i]}`)
@@ -189,9 +189,12 @@
                     let text = ""
                     for (let j = 0; j < tokenised_results[i].length; j++){
                         let token = tokenised_results[i][j]
-                        text +=`<span style="color:${token.color}">${token.word} </span>`
+                        text +=`<span class="tooltipped" data-position="top" data-tooltip="${token.color}" style="color:${token.color}">${token.word} </span>`
                     }
                     p.innerHTML = text
+
+                    var elems = p.querySelectorAll('.tooltipped');
+                    var instances = M.Tooltip.init(elems);
                 })
 
                 let tokens_action_span = document.createElement("span")
@@ -216,6 +219,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.dropdown-trigger');
             var instances = M.Dropdown.init(elems);
+
         });
     </script>
 
