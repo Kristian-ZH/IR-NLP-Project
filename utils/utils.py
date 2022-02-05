@@ -31,7 +31,9 @@ def preprocessText(text):
     filtered_tokens = [w for w in word_tokens if not w.lower() in stop_words]
 
     for filtered_idx, w in enumerate(filtered_tokens):
-            filtered_tokens[filtered_idx] = wordnet_lemmatizer.lemmatize(w.lower())
+        if w == "&":
+            w = "and"
+        filtered_tokens[filtered_idx] = wordnet_lemmatizer.lemmatize(w.lower())
 
     return TreebankWordDetokenizer().detokenize(filtered_tokens)
 

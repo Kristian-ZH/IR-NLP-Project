@@ -71,10 +71,14 @@ def fetchKeysentences(person, query):
 
         doc = nlp(text)
         sentences = ""
+        added = []
         for sent in doc.sents:
+            if len(added) == 6:
+                    break
             for match_id, start, end in phrase_matcher(nlp(sent.text)):
-                if nlp.vocab.strings[match_id] in ["person"]:
-                    sentences += sent.text
+                if nlp.vocab.strings[match_id] in ["person"] and sent.text not in added:
+                    sentences += sent.text.replace("&", "and")
+                    added.append(sent.text)
 
         return sentences
 
@@ -95,7 +99,7 @@ class VSM(Resource):
 
         result = VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5)
 
-        return {'result': formatResults(preprocessed_query, result)}, 200  # return data and 200 OK
+        return {'result': formatResults(query, result)}, 200  # return data and 200 OK
 
 class BIM(Resource):
     def get(self):
@@ -103,12 +107,13 @@ class BIM(Resource):
         parser.add_argument('query', required=True)  # add args
         args = parser.parse_args()
         query = args['query']
-
+        print(query)
         # query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
         preprocessed_query = utils.preprocessText(query)
 
         result = BIMQuery(data, preprocessed_query, 5)
-        return {'result': formatResults(preprocessed_query, result)}, 200  # return data and 200 OK
+
+        return {'result': formatResults(query, result)}, 200  # return data and 200 OK
 
 # class Boolean(Resource):
 #     def get(self):
