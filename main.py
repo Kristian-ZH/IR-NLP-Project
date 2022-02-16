@@ -10,10 +10,13 @@ import sys
 sys.path.insert(1, 'utils')
 sys.path.insert(1, 'DataGeneration')
 sys.path.insert(1, 'VectorSpaceModel')
+sys.path.insert(1, 'Boolean')
 
 import utils
 from BinaryIndependenceModel.BIMQuery import BIMQuery
 import VectorSpaceModel
+import Boolean
+
 
 colorMap = {
     "ADJ": "blue",
@@ -34,6 +37,8 @@ colorMap = {
 }
 
 data = utils.loadDate('DataGeneration/people', 22)
+
+boolSearch,doc_ids = Boolean.prepare("C:\\Users\\Victor\\OneDrive\\AI\\IR\\IR-NLP-Project\\DataGeneration\\people")
 
 # Lemmatizing
 utils.preprocessData(data)
@@ -112,21 +117,21 @@ class BIM(Resource):
         preprocessed_query = utils.preprocessText(query)
 
         result = BIMQuery(data, preprocessed_query, 5)
-
+      
         return {'result': formatResults(query, result)}, 200  # return data and 200 OK
 
-# class Boolean(Resource):
-#     def get(self):
-#         parser = reqparse.RequestParser()  # initialize
-#         parser.add_argument('query', required=True)  # add args
-#         args = parser.parse_args()
-#         query = args['query']
+class Bool(Resource):
+     def get(self):
+        parser = reqparse.RequestParser()  # initialize
+        parser.add_argument('query', required=True)  # add args
+        args = parser.parse_args()
+        query = args['query']
 
-#         # query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
-#         preprocessed_query = preprocessText(query)
+        # query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
+        preprocessed_query = query
 
-#         result = VectorSpaceModel.vectorSpaceModel(data, vec, corpus, preprocessed_query, 5)
-#         return {'result': appendUrl(result)}, 200  # return data and 200 OK
+        result = Boolean.search(doc_ids,boolSearch,preprocessed_query,5)
+        return {'result': formatResults(query,result)}, 200  # return data and 200 OK
 
 class Color(Resource):
     def get(self):
@@ -161,7 +166,7 @@ def index_page():
 
 api.add_resource(VSM, '/vsm')  # add endpoints
 api.add_resource(BIM, '/bim')  # add endpoints
-#api.add_resource(BIM, '/boolean')  # add endpoints
+api.add_resource(Bool, '/boolean')  # add endpoints
 api.add_resource(Color, '/color')  # add endpoints
 
 if __name__ == '__main__':
