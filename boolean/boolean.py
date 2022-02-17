@@ -259,9 +259,7 @@ class BoolRetrievalNot:
 
 class BoolRetrievalBinOp:
     repr_symbol: str = ""
-    eval_fn: Callable[
-        [list[list]], list
-    ] = lambda _: []
+    eval_fn = lambda _: []
 
     def __init__(self, t):
         print("Creating BoolRetrievalBinOp "+self.repr_symbol)
@@ -504,4 +502,4 @@ def search(doc_ids,searcher,query,maxResults):
     print(processed)
     return processed[:maxResults]
 
-test(prepare("C:\\Users\\Victor\\OneDrive\\AI\\IR\\IR-NLP-Project\\boolean\\test")[0])
+# test(prepare("C:\\Users\\Victor\\OneDrive\\AI\\IR\\IR-NLP-Project\\boolean\\test")[0])
