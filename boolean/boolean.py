@@ -105,8 +105,25 @@ def merge_token_in_doc(sorted_token_docid):
     return merged_tokens_in_doc
 
 
+def and_merge(list1,list2) -> list:
+   # print(list1,list2)
+    result = []
+    ind1, ind2 = 0, 0
+    while ind1 < len(list1) and ind2 < len(list2):
+        el1, el2 = list1[ind1], list2[ind2]
+        if el1 == el2:
+            result.append(el1)
+            ind1 += 1 
+            ind2 += 1
+        elif el1 < el2:
+            ind1 += 1
+        elif el1 > el2:
+            ind2 += 1
+    return result
+
 def and_query(postings_word1, postings_word2):
- 
+    print(postings_word1)
+    print(postings_word2)
     documents_results = []
     
     postings_ind1, postings_ind2 = 0, 0
@@ -121,6 +138,31 @@ def and_query(postings_word1, postings_word2):
         elif doc_id1 > doc_id2:
             postings_ind2 += 1
     return documents_results
+
+def sentence_query(postings_word1, postings_word2):
+ 
+    documents_results = []
+    
+    postings_ind1, postings_ind2 = 0, 0
+    while postings_ind1 < len(postings_word1) and postings_ind2 < len(postings_word2):
+        doc_id1, doc_id2 = postings_word1[postings_ind1][0], postings_word2[postings_ind2][0]
+        if doc_id1 == doc_id2:
+            senList = and_merge(postings_word1[postings_ind1][3],postings_word2[postings_ind2][3])
+            if(len(senList) > 0):
+                documents_results.append((doc_id1,len(senList),[],senList))
+            postings_ind1 += 1
+            postings_ind2 += 1
+        elif doc_id1 < doc_id2:
+            postings_ind1 += 1
+        elif doc_id1 > doc_id2:
+            postings_ind2 += 1
+    return documents_results
+
+def sentence_multipar(lists) -> list:
+    prev = lists[0]
+    for i in range(0,len(lists)-1):
+        prev = sentence_query(prev,lists[i+1])
+    return prev
 
 def and_multipar(self,lists) -> list:
     prev = lists[0]
@@ -249,14 +291,23 @@ class BoolRetrievalOr(BoolRetrievalBinOp):
     repr_symbol = "|"
     eval_fn = or_multipar
 
-
+def Diff(li1, li2):
+    return list(set(li1) - set(li2)) + list(set(li2) - set(li1))
 
 def get_wildcard_words(word):
-    return ["one","two"]
+    upperWord = word + "zzzzzzzzzzzzzzzzzzzzzzzzzz"
+    keys = sorted(postings.keys())
+
+   
+    filtered1 = list(filter(lambda x: x >= word,keys))
+    filtered2 = list(filter(lambda x: x >= upperWord,keys))
+   
+    print(Diff(filtered1,filtered2))
+    return Diff(filtered1,filtered2)
 
 
 # %%
-def woldcard_process(word):
+def wildcard_process(word):
     wildcard_words = get_wildcard_words(word)
     print(wildcard_words[0])
     prew = postings[wildcard_words[0]]
@@ -273,9 +324,9 @@ class BoolRetrievalWildcard:
     
     def process(self) -> list:
         print("Processing BoolRetrievalWildcard " + str(self))
-        self.value = woldcard_process(self.label)
+        self.value = wildcard_process(self.label)
         print(self.value)
-        return [self.value]
+        return self.value
 
     def __str__(self) -> str:
         return self.label+"*"
@@ -293,7 +344,8 @@ class BoolRetrievalProximity:
         print("Processing BoolRetrievalProximity " + self.A + " \\" + self.positions + " " + self.B)
        # self.value = postings[ self.label]
       #  print(self.value)
-        return []
+        return process_proximity(self.A,self.B,self.positions)
+        
 
     def __str__(self) -> str:
         return "" + self.A + " /" + self.positions + " " + self.B
@@ -301,9 +353,38 @@ class BoolRetrievalProximity:
     __repr__ = __str__
 
 def process_sentence(words):
-    common_docs = and_multipar("",words)
+    converted = [postings[word] for word in words]
+    print(converted)
+    common_docs = sentence_multipar(converted)
     print(common_docs)
     return common_docs
+
+def process_proximity(A,B,k):
+    k = int(k)
+    print(A,B,k)
+    postings_word1,postings_word2 = postings[A],postings[B]
+    documents_results = []
+    
+    postings_ind1, postings_ind2 = 0, 0
+    while postings_ind1 < len(postings_word1) and postings_ind2 < len(postings_word2):
+        doc_id1, doc_id2 = postings_word1[postings_ind1][0], postings_word2[postings_ind2][0]
+        if doc_id1 == doc_id2:
+            for k_ in range (k+1):
+                
+                print(list(map(lambda x: x + k_ + 1,postings_word1[postings_ind1][2])),postings_word2[postings_ind2][2])
+                proxList = and_merge(list(map(lambda x: x + k_ + 1,postings_word1[postings_ind1][2])),postings_word2[postings_ind2][2])
+                if(len(proxList) > 0):
+                    documents_results.append((doc_id1,len(proxList),proxList,[]))
+                    break
+            postings_ind1 += 1
+            postings_ind2 += 1
+        elif doc_id1 < doc_id2:
+            postings_ind1 += 1
+        elif doc_id1 > doc_id2:
+            postings_ind2 += 1
+
+    print(documents_results)
+    return documents_results
 
 class BoolRetrievalSentence:
     def __init__(self, t):
@@ -395,12 +476,14 @@ def prepare(documentDir):
 
 def test(boolExpr):
     tests = [
-        ("asdasda",True),
+        ("t*",True),
         ("one", True),
         ("tree", True),
-        ("two /4 tree", True),
+        ("two /0 tree", True),
+        ("two /1 tree", True),
         ("one /4 tree /5 five", True),
-        ("/s one tree five six", True),
+        ("/s one two ", True),
+        ("/s one two four ", True),
         ("one or tree",True),
         ("(one and (/s one two)) or (will /3 be)",True),
     ]
@@ -415,7 +498,10 @@ def test(boolExpr):
 def search(doc_ids,searcher,query,maxResults):
     res = searcher.parseString(query)[0]
     unprocessed = res.process()
+    if len(unprocessed) > 0:
+        unprocessed = map(lambda x: (x[0],x[1]) if len(x) > 2 else x,unprocessed)
     processed = [ doc_ids[doc_id] for doc_id, count in unprocessed  ]
     print(processed)
     return processed[:maxResults]
 
+test(prepare("C:\\Users\\Victor\\OneDrive\\AI\\IR\\IR-NLP-Project\\boolean\\test")[0])
