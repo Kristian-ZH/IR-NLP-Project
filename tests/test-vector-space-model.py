@@ -8,8 +8,8 @@ sys.path.insert(1, '../BinaryIndependenceModel')
 sys.path.insert(1, '../VectorSpaceModel')
 sys.path.insert(1, '../utils')
 
-import BinaryIndependenceModel
 import VectorSpaceModel
+import BinaryIndependenceModel
 import utils
 
 def loadQueries():
@@ -49,5 +49,5 @@ def testVectorSpaceModel(query_result):
 
 recall_score_VSM = testVectorSpaceModel(query_result_VSM)
 recall_score_BIM = testVectorSpaceModel(query_result_BIM)
-print("The overall recall score for VSM is: " + recall_score_VSM)
-print("The overall recall score for BIM is: " + recall_score_BIM)
+print("The overall recall score for VSM is: " + str(recall_score_VSM))
+print("The overall recall score for BIM is: " + str(recall_score_BIM))

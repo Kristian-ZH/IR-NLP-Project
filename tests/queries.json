@@ -42,14 +42,6 @@
             ]
         },
         {
-            "query": "actor singer",
-            "result": [
-                "Scarlett_Johansson",
-                "Anne_Hathaway",
-                "Jada_Pinkett_Smith"
-            ]
-        },
-        {
             "query": "actor director screenwriter",
             "result": [
                 "Bryan_Cranston",
@@ -63,12 +55,6 @@
                 "Aaron_Paul",
                 "Bryan_Cranston",
                 "Jonathan_Banks"
-            ]
-        },
-        {
-            "query": "actor born Sydney",
-            "result": [
-                "Alycia_Debnam-Carey"
             ]
         }
     ]

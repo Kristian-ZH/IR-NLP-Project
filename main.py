@@ -10,11 +10,12 @@ import sys
 sys.path.insert(1, 'utils')
 sys.path.insert(1, 'DataGeneration')
 sys.path.insert(1, 'VectorSpaceModel')
+sys.path.insert(1, 'BinaryIndependenceModel')
 sys.path.insert(1, 'Boolean')
 
 import utils
-from BinaryIndependenceModel.BIMQuery import BIMQuery
 import VectorSpaceModel
+import BinaryIndependenceModel
 import Boolean
 
 
@@ -38,7 +39,7 @@ colorMap = {
 
 data = utils.loadDate('DataGeneration/people', 22)
 
-boolSearch,doc_ids = Boolean.prepare("C:\\Users\\Victor\\OneDrive\\AI\\IR\\IR-NLP-Project\\DataGeneration\\people")
+boolSearch,doc_ids = Boolean.prepare("DataGeneration/people")
 
 # Lemmatizing
 utils.preprocessData(data)
@@ -116,7 +117,7 @@ class BIM(Resource):
         # query="Acted in both Breadking Bad and it's spinoff Better Call Saul"
         preprocessed_query = utils.preprocessText(query)
 
-        result = BIMQuery(data, preprocessed_query, 5)
+        result = BinaryIndependenceModel.BIMQuery(data, preprocessed_query, 5)
       
         return {'result': formatResults(query, result)}, 200  # return data and 200 OK
 
