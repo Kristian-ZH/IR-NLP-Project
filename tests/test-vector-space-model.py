@@ -4,9 +4,11 @@ from sklearn.metrics import recall_score
 import sys
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+sys.path.insert(1, '../BinaryIndependenceModel')
 sys.path.insert(1, '../VectorSpaceModel')
 sys.path.insert(1, '../utils')
 
+import BinaryIndependenceModel
 import VectorSpaceModel
 import utils
 
@@ -25,12 +27,13 @@ utils.preprocessData(data)
 vec = TfidfVectorizer(norm=None)
 corpus = vec.fit_transform(data)
 
-query_result = [VectorSpaceModel.vectorSpaceModel(data, vec, corpus, utils.preprocessText(query[0]), 10) for query in expected_result]
+query_result_VSM = [VectorSpaceModel.vectorSpaceModel(data, vec, corpus, utils.preprocessText(query[0]), 5) for query in expected_result]
+query_result_BIM = [BinaryIndependenceModel.BIMQuery(data, utils.preprocessText(query[0]), 5) for query in expected_result]
 
 def to_vector(docs, doc_set):
     return [1 if doc in doc_set else 0 for doc in docs]
 
-def testVectorSpaceModel():
+def testVectorSpaceModel(query_result):
     filenames = next(walk('../DataGeneration/people'), (None, None, []))[2]
 
     gold_v = [to_vector(filenames, _v[1]) for _v in expected_result]
@@ -44,5 +47,7 @@ def testVectorSpaceModel():
     
     return overall_recall/queries_sum
 
-recall_score = testVectorSpaceModel()
-print("The overall recall score is: " + recall_score)
+recall_score_VSM = testVectorSpaceModel(query_result_VSM)
+recall_score_BIM = testVectorSpaceModel(query_result_BIM)
+print("The overall recall score for VSM is: " + recall_score_VSM)
+print("The overall recall score for BIM is: " + recall_score_BIM)
